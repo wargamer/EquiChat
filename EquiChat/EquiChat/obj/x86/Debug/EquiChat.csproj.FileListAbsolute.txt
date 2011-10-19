@@ -1,9 +1,0 @@
-c:\users\vincent\documents\github\EquiChat\EquiChat\EquiChat\bin\Debug\EquiChat.exe
-c:\users\vincent\documents\github\EquiChat\EquiChat\EquiChat\bin\Debug\EquiChat.pdb
-c:\users\vincent\documents\github\EquiChat\EquiChat\EquiChat\obj\x86\Debug\ResolveAssemblyReference.cache
-c:\users\vincent\documents\github\EquiChat\EquiChat\EquiChat\obj\x86\Debug\EquiChat.Form1.resources
-c:\users\vincent\documents\github\EquiChat\EquiChat\EquiChat\obj\x86\Debug\EquiChat.Properties.Resources.resources
-c:\users\vincent\documents\github\EquiChat\EquiChat\EquiChat\obj\x86\Debug\ResGen.read.1.tlog
-c:\users\vincent\documents\github\EquiChat\EquiChat\EquiChat\obj\x86\Debug\ResGen.write.1.tlog
-c:\users\vincent\documents\github\EquiChat\EquiChat\EquiChat\obj\x86\Debug\EquiChat.exe
-c:\users\vincent\documents\github\EquiChat\EquiChat\EquiChat\obj\x86\Debug\EquiChat.pdb
