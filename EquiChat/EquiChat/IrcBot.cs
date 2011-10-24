@@ -127,6 +127,25 @@ class IrcBot : DispatcherObject
         }        
     }
 
+    private string ReadLineWithTimeout(int milliseconds)
+    {   
+        AutoResetEvent autoEvent = new AutoResetEvent(false);
+        string buffer;
+
+        System.Threading.Timer timeoutTimer = new Timer (
+            (Object stateInfo) =>
+            {
+                Console.WriteLine("TIMEOUT @ ReadLineWithTimeout !");
+            },
+            autoEvent,
+            milliseconds,
+            0);
+        buffer = reader.ReadLine();
+
+        return buffer;
+
+    }
+
     public void Run()
     {
         string inputLine = "";        
@@ -142,10 +161,21 @@ class IrcBot : DispatcherObject
                 writer.WriteLine("NICK " + nick);
                 writer.Flush();
                 writer.WriteLine("JOIN " + channel);
-                writer.Flush();
+                writer.Flush();                                
                 while (true)
                 {
-                    if ((inputLine = reader.ReadLine()) != null)
+                    DateTime startTime = DateTime.Now;
+                    TimeSpan timeout = TimeSpan.FromMilliseconds(10);
+                    inputLine = "";
+                    while (DateTime.Now.Subtract(startTime) < timeout && inputLine == "")
+                    {
+                        if (reader.Peek() > -1)
+                        {                            
+                            inputLine = reader.ReadLine();
+                        }                        
+                    }
+                    //if ((inputLine = ReadLineWithTimeout(10)) != "") //reader.ReadLine()
+                    if(inputLine != "")
                     {
                         string[] message;                        
                         if (inputLine.Contains("PRIVMSG") && (message = parseChatMessage(inputLine)) != null)
