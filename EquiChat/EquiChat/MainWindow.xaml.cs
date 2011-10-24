@@ -24,13 +24,13 @@ namespace EquiChat
     public partial class MainWindow : Window
     {
         private IrcBot bot;
-        private GameScanner gs;
+        private Controller controller;
 
         public MainWindow()
         {
             InitializeComponent();            
             bot = new IrcBot();
-            gs = new GameScanner();
+            controller = new Controller();
         }
         /**
          * Public functions
@@ -142,7 +142,7 @@ namespace EquiChat
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            gs.stop();
+            controller.stop();
         }
     }
 }

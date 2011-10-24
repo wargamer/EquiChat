@@ -58,6 +58,8 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Constants.cs" />
+    <Compile Include="Controller.cs" />
     <Compile Include="GameScanner.cs" />
     <Compile Include="IrcBot.cs" />
     <Compile Include="MainWindow.xaml.cs">
