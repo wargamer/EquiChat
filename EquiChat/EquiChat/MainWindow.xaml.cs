@@ -22,13 +22,15 @@ namespace EquiChat
 
 
     public partial class MainWindow : Window
-    {        
-        private IrcBot bot;        
+    {
+        private IrcBot bot;
+        private GameScanner gs;
 
         public MainWindow()
         {
             InitializeComponent();            
-            bot = new IrcBot();            
+            bot = new IrcBot();
+            gs = new GameScanner();
         }
         /**
          * Public functions
@@ -136,6 +138,11 @@ namespace EquiChat
             username.IsReadOnly = false;
             username.Background = Brushes.White;
             login.Content = "Login";            
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            gs.stop();
         }
     }
 }
