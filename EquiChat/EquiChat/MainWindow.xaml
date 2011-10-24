@@ -6,8 +6,8 @@
         <Border BorderBrush="Black" BorderThickness="1" Margin="524,66,12,50">
             <TextBlock Height="446" Name="players" Text="" Width="240" />
         </Border>
-        <Border Margin="7,66,273,50" BorderThickness="1" BorderBrush="Black" >            
-            <TextBlock Height="442" Name="chat" Text="" Width="496" TextWrapping="Wrap" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True"/>            
+        <Border Margin="7,66,273,50" BorderThickness="1" BorderBrush="Black" >
+            <TextBlock Height="442" Name="chat" Text="" Width="496" TextWrapping="Wrap" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True" VerticalAlignment="Bottom" />            
         </Border>
         <TextBox Height="23" HorizontalAlignment="Left" Margin="7,12,0,0" Name="username" VerticalAlignment="Top" Width="185" Text="Username" MouseEnter="username_MouseEnter" MouseLeave="username_MouseLeave" LostFocus="username_LostFocus" KeyUp="username_KeyUp" />
         <Button Content="Login" Height="23" HorizontalAlignment="Left" Margin="198,12,0,0" Name="login" VerticalAlignment="Top" Width="97" Click="login_Click" />
