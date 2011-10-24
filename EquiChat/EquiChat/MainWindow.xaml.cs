@@ -82,6 +82,7 @@ namespace EquiChat
                 bot.sendMessage(s);
             };
             bot.Dispatcher.Invoke(DispatcherPriority.Normal, writeLine, message.Text);
+            message.Clear();
         }
         
         /**
