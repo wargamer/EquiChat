@@ -30,7 +30,61 @@ namespace EquiChat
             InitializeComponent();            
             bot = new IrcBot();            
         }
+        /**
+         * Public functions
+         */
 
+        public void addToChat(string text)
+        {
+            chat.Text = chat.Text + text;
+        }
+
+        /**
+         * Private, Message related functions
+         */
+        
+        private void message_MouseEnter(object sender, MouseEventArgs e)
+        {
+            if (message.Text == "Message...")
+                message.Text = "";
+        }
+
+        private void message_MouseLeave(object sender, MouseEventArgs e)
+        {            
+            if (message.Text == "" && !message.IsFocused)
+                message.Text = "Message...";            
+        }
+
+        private void message_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (message.Text == "")
+                message.Text = "Message...";
+        }
+
+        private void message_KeyUp(object sender, KeyEventArgs e)
+        {
+            if(e.Key == Key.Enter)
+                UIsendMessage();
+        }
+
+        private void Send_Click(object sender, RoutedEventArgs e)
+        {
+            UIsendMessage();
+        }
+
+        private void UIsendMessage() 
+        {            
+            Action<String> writeLine;
+            writeLine = delegate(string s)
+            {
+                bot.sendMessage(s);
+            };
+            bot.Dispatcher.Invoke(DispatcherPriority.Normal, writeLine, message.Text);
+        }
+        
+        /**
+         * Private, login related functions
+         */
         private void username_MouseEnter(object sender, MouseEventArgs e)
         {
             if (username.Text == "Username")
@@ -49,43 +103,39 @@ namespace EquiChat
                 username.Text = "Username";
         }
 
-        private void message_MouseEnter(object sender, MouseEventArgs e)
-        {
-            if (message.Text == "Message...")
-                message.Text = "";
-        }
-
-        private void message_MouseLeave(object sender, MouseEventArgs e)
-        {
-            if (message.Text == "" && !message.IsFocused)
-                message.Text = "Message...";            
-        }
-
-        private void message_LostFocus(object sender, RoutedEventArgs e)
-        {
-            if (message.Text == "")
-                message.Text = "Message...";
-        }
-
-        public void addToChat(string text)
-        {
-            chat.Text = chat.Text + text;
-        }
-
         private void login_Click(object sender, RoutedEventArgs e)
         {
-            TextBlock chat = this.chat;
-            bot.Start(username.Text, "#chatter", "CSharpBot 8 * :I'm a C# irc bot", "uws.mine.nu", chat);             
+            if (login.Content.ToString() == "Login")
+            {
+                UIlogin();
+            }
+            else if (login.Content.ToString() == "Logout")
+            {
+                UILogout();
+            }
+            
         }
 
-        private void Send_Click(object sender, RoutedEventArgs e)
+        private void username_KeyUp(object sender, KeyEventArgs e)
         {
-            Action<String> writeLine;
-            writeLine = delegate(string s)
-            {
-                bot.sendMessage(s);
-            };
-            bot.Dispatcher.Invoke(DispatcherPriority.Normal, writeLine, message.Text);
+            if(e.Key == Key.Enter)
+                UIlogin();
+        }
+
+        private void UIlogin()
+        {
+            username.IsReadOnly = true;
+            username.Background = Brushes.LightSlateGray; 
+            login.Content = "Logout";
+            bot.Start(username.Text, "#chatter", username.Text + " 8 * :LAN Party Player", "uws.mine.nu", this.chat);
+        }
+
+        private void UILogout()
+        {
+            bot.Stop();            
+            username.IsReadOnly = false;
+            username.Background = Brushes.White;
+            login.Content = "Login";            
         }
     }
 }

@@ -4,7 +4,7 @@ using System.Net.Sockets;
 using System.IO;
 using System.Threading;
 using System.Windows.Threading;
-
+using System.Text.RegularExpressions;
 
 using System.Windows;
 using System.Windows.Controls;
@@ -16,18 +16,9 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-public delegate void addToChat(string text);
-/*
-* This program establishes a connection to irc server, joins a channel and greets every nickname that
-* joins the channel.
-*
-* Coded by Pasi Havia 17.11.2001 http://koti.mbnet.fi/~curupted
-*/
 class IrcBot : DispatcherObject
-{    
-    // Irc server's port (6667 is default port)
-    private static int PORT = 6667;
-    // StreamWriter is declared here so that PingSender can access it
+{   
+    private static int PORT = 6667;    
     private Thread bot;
     
     private string nick;
@@ -35,12 +26,14 @@ class IrcBot : DispatcherObject
     private string user;
     private string hostname;
     private TextBlock chat;
+    private PingSender ping;
     static bool started = false;
 
     private NetworkStream stream;
     private TcpClient irc;
     private StreamReader reader;
 
+    // StreamWriter is declared here so that PingSender can access it
     public static StreamWriter writer;
 
     public IrcBot () {        
@@ -58,6 +51,11 @@ class IrcBot : DispatcherObject
         bot.Start();        
     }
 
+    public void Stop()
+    {        
+        bot.Abort();
+    }
+
     private object InvokeMethod(Delegate method, params object[] args)
     {
         return method.DynamicInvoke(args);
@@ -67,7 +65,37 @@ class IrcBot : DispatcherObject
     {
         writer.WriteLine("PRIVMSG " + channel + " " + line);
         writer.Flush();
-        addLineToChat("PRIVMSG " + channel + " " + line);
+        addLineToChat("<" + nick + "> " + line);
+    }
+
+    private string[] parseChatMessage(string rawMessage)
+    {
+        Match match = Regex.Match(rawMessage, @"^\:(.+)!.+@.+\sPRIVMSG\s\#[A-Z]+\s\:(.+)$", RegexOptions.IgnoreCase);         
+        if (match.Success)
+        {
+            // 1 = user, 2 = message
+            string[] answer = { match.Groups[1].Value, match.Groups[2].Value };
+            return answer;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    private string[] parseAnnouncement(string rawMessage)
+    {
+        Match match = Regex.Match(rawMessage, @"^\:[A-Z0-9.-]*\.[A-Z0-9.-]+\.[A-Z]{2,4}\s([0-9]+)\s[^\s\t]+\s\:(.+)$", RegexOptions.IgnoreCase);
+        if (match.Success)
+        {
+            // 1 = messagecode, 2 = message
+            string[] answer = { match.Groups[1].Value, match.Groups[2].Value };
+            return answer;
+        }
+        else
+        {
+            return null;
+        }
     }
 
     private void addLineToChat(string line)
@@ -80,51 +108,79 @@ class IrcBot : DispatcherObject
         chat.Dispatcher.BeginInvoke(DispatcherPriority.Normal, writeLine, line);
     }
 
+    private void stopNow()
+    {
+        Console.WriteLine("!!IrcBot caught an abort exception, stopping NOW!!");
+        ping.Stop();
+        writer.Close();
+        reader.Close();
+        irc.Close();        
+    }
+
+    private void sleepWithBreaks(int sleepTime)
+    {
+        int sleptTime = 0;
+        while (sleptTime < sleepTime)
+        {            
+            Thread.Sleep(10);
+            sleptTime += 10;            
+        }        
+    }
+
     public void Run()
-    {        
-        string inputLine;        
+    {
+        string inputLine = "";        
 
         try
         {
             if (connect())
             {
-                // Start PingSender thread
-                PingSender ping = new PingSender(this);
+                ping = new PingSender(this);
                 ping.Start();
                 writer.WriteLine("USER " + user);
-                writer.Flush();                
+                writer.Flush();
                 writer.WriteLine("NICK " + nick);
-                writer.Flush();                
-                writer.WriteLine("JOIN " + channel);                
-                writer.Flush();                
+                writer.Flush();
+                writer.WriteLine("JOIN " + channel);
+                writer.Flush();
                 while (true)
                 {
                     if ((inputLine = reader.ReadLine()) != null)
                     {
-                        if (inputLine.Contains("PRIVMSG"))
+                        string[] message;                        
+                        if (inputLine.Contains("PRIVMSG") && (message = parseChatMessage(inputLine)) != null)
                         {
-                            Console.WriteLine(inputLine);
-                            addLineToChat(inputLine);
+                            string temp = "<" + message[0] + "> " + message[1];
+                            addLineToChat(temp);
                         }
-
-                        //if (inputLine.EndsWith("JOIN :" + channel))                        
-                    }
-                    // Close all streams
-                    //writer.Close();
-                    //reader.Close();
-                    //irc.Close();
+                        else if ((message = parseAnnouncement(inputLine)) != null)
+                        {
+                            if (message[0] == "001")
+                            {
+                                addLineToChat(message[1]);
+                                addLineToChat("\n");
+                            }
+                        }
+                        Console.WriteLine("!!DEBUG: " + inputLine);                        
+                    }                    
                 }
-            } else {
+            }
+            else
+            {
                 Console.WriteLine("Connection failed.");
-                Thread.Sleep(5000);
+                sleepWithBreaks(5000);
                 Run();
             }
         }
+        catch (ThreadAbortException abortException)
+        {
+            stopNow();
+            return;
+        }
         catch (Exception e)
         {
-            // Show the exception, sleep for a while and try to establish a new connection to irc server
             Console.WriteLine(e.ToString());
-            Thread.Sleep(5000);
+            sleepWithBreaks(5000);
             Run();
         }
     }

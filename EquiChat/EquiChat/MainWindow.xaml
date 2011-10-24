@@ -9,11 +9,11 @@
         <Border Margin="7,66,273,50" BorderThickness="1" BorderBrush="Black" >            
             <TextBlock Height="442" Name="chat" Text="" Width="496" TextWrapping="Wrap" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True"/>            
         </Border>
-        <TextBox Height="23" HorizontalAlignment="Left" Margin="7,12,0,0" Name="username" VerticalAlignment="Top" Width="185" Text="Username" MouseEnter="username_MouseEnter" MouseLeave="username_MouseLeave" LostFocus="username_LostFocus" />
+        <TextBox Height="23" HorizontalAlignment="Left" Margin="7,12,0,0" Name="username" VerticalAlignment="Top" Width="185" Text="Username" MouseEnter="username_MouseEnter" MouseLeave="username_MouseLeave" LostFocus="username_LostFocus" KeyUp="username_KeyUp" />
         <Button Content="Login" Height="23" HorizontalAlignment="Left" Margin="198,12,0,0" Name="login" VerticalAlignment="Top" Width="97" Click="login_Click" />
         <Label Content="Users online:" Height="23" HorizontalAlignment="Left" Margin="525,37,0,0" Name="label1" VerticalAlignment="Top" Width="142" Padding="0" />
         <Label Content="Chat:" Height="19" HorizontalAlignment="Left" Margin="12,0,0,501" Name="label2" VerticalAlignment="Bottom" Width="123" Padding="0" />
         <Button Content="Send" Height="27" HorizontalAlignment="Left" Margin="313,522,0,0" Name="Send" VerticalAlignment="Top" Width="191" Click="Send_Click" />
-        <TextBox Height="27" HorizontalAlignment="Left" Margin="12,522,0,0" Name="message" Text="Message..." VerticalAlignment="Top" Width="288" MouseEnter="message_MouseEnter" MouseLeave="message_MouseLeave" LostFocus="message_LostFocus" />
+        <TextBox Height="27" HorizontalAlignment="Left" Margin="12,522,0,0" Name="message" Text="Message..." VerticalAlignment="Top" Width="288" MouseEnter="message_MouseEnter" MouseLeave="message_MouseLeave" LostFocus="message_LostFocus" KeyUp="message_KeyUp" />
     </Grid>
 </Window>
