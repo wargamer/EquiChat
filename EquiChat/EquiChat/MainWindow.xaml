@@ -9,8 +9,8 @@
         <Border Margin="7,66,273,50" BorderThickness="1" BorderBrush="Black" >
             <TextBlock Height="442" Name="chat" Text="" Width="496" TextWrapping="Wrap" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True" VerticalAlignment="Bottom" />            
         </Border>
-        <TextBox Height="23" HorizontalAlignment="Left" Margin="7,12,0,0" Name="username" VerticalAlignment="Top" Width="185" Text="Username" MouseEnter="username_MouseEnter" MouseLeave="username_MouseLeave" LostFocus="username_LostFocus" KeyUp="username_KeyUp" />
-        <Button Content="Login" Height="23" HorizontalAlignment="Left" Margin="198,12,0,0" Name="login" VerticalAlignment="Top" Width="97" Click="login_Click" />
+        <TextBox Height="23" HorizontalAlignment="Left" Margin="7,12,0,0" Name="username" VerticalAlignment="Top" Width="185" Text="Nickname" MouseEnter="username_MouseEnter" MouseLeave="username_MouseLeave" LostFocus="username_LostFocus" KeyUp="username_KeyUp" />
+        <Button Content="Connect" Height="23" HorizontalAlignment="Left" Margin="198,12,0,0" Name="login" VerticalAlignment="Top" Width="97" Click="login_Click" />
         <Label Content="Users online:" Height="23" HorizontalAlignment="Right" Margin="0,37,111,0" Name="label1" VerticalAlignment="Top" Width="142" Padding="0" />
         <Label Content="Chat:" Margin="12,37,0,0" Name="label2" Padding="0" HorizontalAlignment="Left" Width="123" Height="23" VerticalAlignment="Top" />
         <Button Content="Send" Margin="0,0,274,12" Name="Send" Click="Send_Click" Height="27" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="191" />

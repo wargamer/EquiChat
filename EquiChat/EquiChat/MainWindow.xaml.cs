@@ -25,12 +25,18 @@ namespace EquiChat
     {
         private IrcBot bot;
         private Controller controller;
+        private bool connected;
+        private bool allowedSend;
 
         public MainWindow()
         {
             InitializeComponent();            
             bot = new IrcBot();
             controller = new Controller();
+            connected = false;
+            // Starts off as true, only if nick command fails should this be true
+            // As a nick fail is not a disconnect, this bool is used
+            allowedSend = true;
         }
         /**
          * Public functions
@@ -75,14 +81,46 @@ namespace EquiChat
         }
 
         private void UIsendMessage() 
-        {            
-            Action<String> writeLine;
-            writeLine = delegate(string s)
+        {
+            if (connected && allowedSend)
             {
-                bot.sendMessage(s);
-            };
-            bot.Dispatcher.Invoke(DispatcherPriority.Normal, writeLine, message.Text);
-            message.Clear();
+                Action<String> writeLine;
+                writeLine = delegate(string s)
+                {
+                    bot.sendMessage(s);
+                };
+                bot.Dispatcher.Invoke(DispatcherPriority.Normal, writeLine, message.Text);
+                message.Clear();
+            }
+            else if(!connected)
+            {
+                chat.Text += "Connect first!\r\n";
+            }
+            else if (!allowedSend)
+            {
+                chat.Text += "Choose a (valid) nickname first\r\n";
+            }
+            
+        }
+
+        public void addLineToChat(string line, string action)
+        {
+            chat.Text += "\r\n" + line;
+            switch (action)
+            {
+                case "resetNick":
+                    username.Clear();
+                break;
+                case "notAllowedToSend":
+                    allowedSend = false;
+                    username.Clear();
+                break;
+                case "allowedToSend":
+                    allowedSend = true;
+                break;
+                default:
+                break;
+            }
         }
         
         /**
@@ -90,29 +128,29 @@ namespace EquiChat
          */
         private void username_MouseEnter(object sender, MouseEventArgs e)
         {
-            if (username.Text == "Username")
+            if (username.Text == "Nickname")
                 username.Text = "";
         }
 
         private void username_MouseLeave(object sender, MouseEventArgs e)
         {
             if(username.Text == "" && !username.IsFocused)
-                username.Text = "Username";
+                username.Text = "Nickname";
         }
 
         private void username_LostFocus(object sender, RoutedEventArgs e)
         {
             if (username.Text == "")
-                username.Text = "Username";
+                username.Text = "Nickname";
         }
 
         private void login_Click(object sender, RoutedEventArgs e)
         {
-            if (login.Content.ToString() == "Login")
+            if (!connected)
             {
                 UIlogin();
             }
-            else if (login.Content.ToString() == "Logout")
+            else if (connected)
             {
                 UILogout();
             }
@@ -121,29 +159,41 @@ namespace EquiChat
 
         private void username_KeyUp(object sender, KeyEventArgs e)
         {
-            if(e.Key == Key.Enter)
+            if (e.Key == Key.Enter && !connected)
+            {
                 UIlogin();
+            }
+            else if (e.Key == Key.Enter && connected)
+            {
+                Action<String> changeNick;
+                changeNick = delegate(string nick)
+                {
+                    bot.changeNick(nick);
+                };
+                bot.Dispatcher.Invoke(DispatcherPriority.Normal, changeNick, username.Text);
+                message.Clear();
+            }
+                
         }
 
         private void UIlogin()
-        {
-            username.IsReadOnly = true;
-            username.Background = Brushes.LightSlateGray; 
-            login.Content = "Logout";
-            bot.Start(username.Text, "#chatter", username.Text + " 8 * :LAN Party Player", "uws.mine.nu", this.chat);
+        {   
+            login.Content = "Disconnect";
+            bot.Start(username.Text, "#chatter", username.Text + " 8 * :LAN Party Player", "uws.mine.nu", this);
+            connected = true;
         }
 
         private void UILogout()
         {
             bot.Stop();            
-            username.IsReadOnly = false;
-            username.Background = Brushes.White;
-            login.Content = "Login";            
+            login.Content = "Connect";
+            connected = false;
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             controller.stop();
+            bot.Stop();
         }
     }
 }

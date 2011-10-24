@@ -26,7 +26,7 @@ namespace EquiChat {
         private string channel;
         private string user;
         private string hostname;
-        private TextBlock chat;
+        private MainWindow window;
         private PingSender ping;
         static bool started = false;
 
@@ -41,15 +41,15 @@ namespace EquiChat {
             bot = new Thread(new ThreadStart(this.Run));
 	    }
 
-        public void Start(string pNick, string pChannel, string pUser, string pHostname, TextBlock pChat)
+        public void Start(string pNick, string pChannel, string pUser, string pHostname, MainWindow pWindow)
         {
             if (pNick == "" || pChannel == "" || pUser == "" || pHostname == "" || started == true)
                 return;
             started = true;
             nick = pNick; channel = pChannel; user = pUser; hostname = pHostname;
-            chat = pChat;
+            window = pWindow;
 
-            bot.Name = ("IRC BOT " + hostname);
+            bot.Name = ("IRC BOT " + hostname + " " + channel);
             bot.Start();
         }
 
@@ -62,16 +62,16 @@ namespace EquiChat {
         {
             writer.WriteLine("PRIVMSG " + channel + " " + line);
             writer.Flush();
-            addLineToChat("<" + nick + "> " + line);
+            addLineToChat("<" + nick + "> " + line, "");
         }
 
-        private string[] parseChatMessage(string rawMessage)
+        private string[] parseUserMessage(string rawMessage)
         {
-            Match match = Regex.Match(rawMessage, @Constants.privmsgRegexp, RegexOptions.IgnoreCase);         
+            Match match = Regex.Match(rawMessage, @Constants.usermsgRegexp, RegexOptions.IgnoreCase);         
             if (match.Success)
             {
-                // 1 = user, 2 = message
-                string[] answer = { match.Groups[1].Value, match.Groups[2].Value };
+                // 1 = user, 2 = type (privmsg, nick), 3 = message
+                string[] answer = { match.Groups[1].Value, match.Groups[2].Value, match.Groups[3].Value };
                 return answer;
             }
             else
@@ -95,19 +95,32 @@ namespace EquiChat {
             }
         }
 
-        private void addLineToChat(string line)
+        private void addLineToChat(string line, string action)
         {
-            Action<String> writeLine;
-            writeLine = delegate(string s)
+            Action<string, string> writeLine;
+            writeLine = delegate(string l, string a)
             {
-                chat.Text = chat.Text + "\r\n" + s;
+                window.addLineToChat(l, a);
             };
-            chat.Dispatcher.BeginInvoke(DispatcherPriority.Normal, writeLine, line);
+            window.Dispatcher.BeginInvoke(DispatcherPriority.Normal, writeLine, line, action);
+        }
+
+        private void sendNick()
+        {
+            writer.WriteLine("NICK " + nick);
+            writer.Flush();
+        }
+        private void sendLogin()
+        {
+            writer.WriteLine("USER " + user);
+            writer.Flush();
+            sendNick();
+            writer.WriteLine("JOIN " + channel);
+            writer.Flush();
         }
 
         private void stopNow()
-        {
-            Console.WriteLine("!!IrcBot caught an abort exception, stopping NOW!!");
+        {            
             ping.Stop();
             writer.Close();
             reader.Close();
@@ -124,46 +137,78 @@ namespace EquiChat {
             }        
         }
 
+        public void changeNick(string pNick)
+        {
+            if(pNick != "")
+                nick = pNick;
+        }
+
         public void Run()
         {
             string inputLine = "";        
+            bool invalidNick = false;
+            bool registered = false;
+            string firstNick = nick;
 
             try
             {
                 if (connect())
-                {
+                {                    
                     ping = new PingSender(this);
                     ping.Start();
-                    writer.WriteLine("USER " + user);
-                    writer.Flush();
-                    writer.WriteLine("NICK " + nick);
-                    writer.Flush();
-                    writer.WriteLine("JOIN " + channel);
-                    writer.Flush();                                
+                    sendLogin();
                     while (true)
-                    {                    
+                    {         
                         inputLine = "";
-                        if ((inputLine = reader.ReadLine()) != "")                            
+                        if (invalidNick && firstNick != nick)
+                        {
+                            sendLogin();
+                            invalidNick = false;                            
+                        }
+                        else if (!invalidNick && firstNick != nick)
+                        {
+                            sendNick();
+                        }
+                        if (irc.GetStream().DataAvailable && (inputLine = reader.ReadLine()) != "")
                         {
                             string[] message;
-                            if (inputLine.Contains("PRIVMSG") && (message = parseChatMessage(inputLine)) != null)
+                            if (inputLine.Contains("PRIVMSG") && (message = parseUserMessage(inputLine)) != null && message[1] == "PRIVMSG")
                             {
                                 string temp = "<" + message[0] + "> " + message[1];
-                                addLineToChat(temp);
-                                writer.WriteLine("NICK " + message[1]);
-                                writer.Flush();
+                                addLineToChat(temp, "");                                
                             }
+                            else if (inputLine.Contains("NICK") && (message = parseUserMessage(inputLine)) != null && message[1] == "NICK")
+                            {
+                                firstNick = nick;
+                                addLineToChat("", "allowedToSend");                                
+                            } 
                             else if ((message = parseAnnouncement(inputLine)) != null)
                             {
                                 if (message[0] == "001")
                                 {
-                                    addLineToChat(message[1]);
-                                    addLineToChat("\n");
+                                    invalidNick = false;
+                                    registered = true;
+                                    firstNick = nick;
+                                    addLineToChat(message[1] + "\n", "allowedToSend");                                    
                                 }
                                 else if (message[0] == "433")
                                 {
-                                    addLineToChat("Username is already in use!");
+                                    if (registered)
+                                    {
+                                        nick = firstNick;
+                                        addLineToChat("Nickname is already in use!", "resetNick");
+                                    }
+                                    else
+                                    {
+                                        addLineToChat("Nickname is already in use!", "notAllowedToSend");
+                                        invalidNick = true;
+                                    }                                        
                                 }
+                                else if (message[0] == "438") // Too many nick changes
+                                {
+                                    addLineToChat(message[1], "");
+                                }
+
                             } 
                             Console.WriteLine("DEBUG: " + inputLine);
                         }
@@ -177,7 +222,7 @@ namespace EquiChat {
                     Run();
                 }
             }
-            catch (ThreadAbortException abortException)
+            catch (ThreadAbortException)
             {
                 stopNow();
                 return;

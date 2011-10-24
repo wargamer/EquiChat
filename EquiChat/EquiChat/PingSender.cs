@@ -50,10 +50,8 @@ namespace EquiChat
                     IrcBot.writer.Flush();
                     sleepWithBreaks(sleepTime);
                 }
-                catch (ThreadAbortException abortException)
+                catch (ThreadAbortException)
                 {
-                    Console.WriteLine("!!PingSender caught an abort exception, stopping NOW!!");
-                    Console.WriteLine((string)abortException.ExceptionState);
                     return;
                 }
             }
