@@ -1,0 +1,14 @@
+<gamelist>
+	<game>
+		<name>League of Legends</name>
+		<pname>lol</pname>
+	</game>
+	<game>
+		<name>notepad</name>
+		<pname>notepad</pname>
+	</game>
+	<game>
+		<name>command prompt</name>
+		<pname>cmd</pname>
+	</game>
+</gamelist>
