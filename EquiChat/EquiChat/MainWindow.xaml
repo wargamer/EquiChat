@@ -1,36 +1,19 @@
 ﻿<Window x:Class="EquiChat.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:src="clr-namespace:EquiChat"
-        xmlns:coll="clr-namespace:System.Collections.ObjectModel;assembly=mscorlib"
-        Title="MainWindow" Height="600" Width="800" Closing="Window_Closing" Loaded="Window_Loaded">
+        Title="MainWindow" Height="600" Width="800" Closing="Window_Closing">
     <Grid>
-        <Grid.Resources>
-            <src:PlayerCollection x:Key="pc"/>
-        </Grid.Resources>
-        <Border BorderBrush="Black" BorderThickness="1" Margin="524,66,12,50">
-            <ListBox Height="405" Name="listBox1" Width="197" ItemsSource="{StaticResource pc}">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding Name}" />
-                        <TextBlock Text=", " />
-                        <TextBlock Text="{Binding Playing}" />
-                    </StackPanel>
-                    </DataTemplate>
-
-                </ListBox.ItemTemplate>
-            </ListBox>
+        <Border BorderBrush="Black" BorderThickness="1" Margin="0,66,12,50" HorizontalAlignment="Right" Width="242">
+            <TextBlock Height="446" Name="players" Text="" Width="240" />
         </Border>
-        <Border Margin="7,66,273,50" BorderThickness="1" BorderBrush="Black" >            
-            <TextBlock Height="442" Name="chat" Text="" Width="496" TextWrapping="Wrap" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True"/>            
+        <Border Margin="7,66,273,50" BorderThickness="1" BorderBrush="Black" >
+            <TextBlock Height="442" Name="chat" Text="" Width="496" TextWrapping="Wrap" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True" VerticalAlignment="Bottom" />            
         </Border>
-        <TextBox Height="23" HorizontalAlignment="Left" Margin="7,12,0,0" Name="username" VerticalAlignment="Top" Width="185" Text="Username" MouseEnter="username_MouseEnter" MouseLeave="username_MouseLeave" LostFocus="username_LostFocus" KeyUp="username_KeyUp" />
-        <Button Content="Login" Height="23" HorizontalAlignment="Left" Margin="198,12,0,0" Name="login" VerticalAlignment="Top" Width="97" Click="login_Click" />
-        <Label Content="Users online:" Height="23" HorizontalAlignment="Left" Margin="525,37,0,0" Name="label1" VerticalAlignment="Top" Width="142" Padding="0" />
-        <Label Content="Chat:" Height="19" HorizontalAlignment="Left" Margin="12,0,0,501" Name="label2" VerticalAlignment="Bottom" Width="123" Padding="0" />
-        <Button Content="Send" Height="27" HorizontalAlignment="Left" Margin="313,522,0,0" Name="Send" VerticalAlignment="Top" Width="191" Click="Send_Click" />
-        <TextBox Height="27" HorizontalAlignment="Left" Margin="12,522,0,0" Name="message" Text="Message..." VerticalAlignment="Top" Width="288" MouseEnter="message_MouseEnter" MouseLeave="message_MouseLeave" LostFocus="message_LostFocus" KeyUp="message_KeyUp" />
-        <Button Content="DEBUG" Height="23" HorizontalAlignment="Left" Margin="684,20,0,0" Name="debugButton" VerticalAlignment="Top" Width="75" Click="button1_Click" />
+        <TextBox Height="23" HorizontalAlignment="Left" Margin="7,12,0,0" Name="username" VerticalAlignment="Top" Width="185" Text="Nickname" MouseEnter="username_MouseEnter" MouseLeave="username_MouseLeave" LostFocus="username_LostFocus" KeyUp="username_KeyUp" />
+        <Button Content="Connect" Height="23" HorizontalAlignment="Left" Margin="198,12,0,0" Name="login" VerticalAlignment="Top" Width="97" Click="login_Click" />
+        <Label Content="Users online:" Height="23" HorizontalAlignment="Right" Margin="0,37,111,0" Name="label1" VerticalAlignment="Top" Width="142" Padding="0" />
+        <Label Content="Chat:" Margin="12,37,0,0" Name="label2" Padding="0" HorizontalAlignment="Left" Width="123" Height="23" VerticalAlignment="Top" />
+        <Button Content="Send" Margin="0,0,274,12" Name="Send" Click="Send_Click" Height="27" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="191" />
+        <TextBox Margin="12,0,478,12" Name="message" Text="Message..." MouseEnter="message_MouseEnter" MouseLeave="message_MouseLeave" LostFocus="message_LostFocus" KeyUp="message_KeyUp" Height="27" VerticalAlignment="Bottom" />
     </Grid>
 </Window>
