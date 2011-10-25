@@ -8,13 +8,13 @@ using System.Linq;
 
 namespace EquiChat
 {
-    public delegate void ChangedEventHandler(object sender, GameUpdateEventArgs e);
+    public delegate void GameUpdate(object sender, GameUpdateEventArgs e);
 
     class GameScanner
     {
         private Dictionary<string, string> gameList = new Dictionary<string, string>();
         public string currentlyPlaying { get; private set; }
-        public event ChangedEventHandler GameLaunched;
+        public event GameUpdate GameLaunched;
 
         public System.Management.ManagementEventWatcher ProcessStartWatcher;
         public System.Management.ManagementEventWatcher ProcessStopWatcher;
@@ -68,7 +68,6 @@ namespace EquiChat
             }
             else
                 throw new System.PlatformNotSupportedException();
-            
         }
 
         private string getGameNameFromProc(string procName)
@@ -79,15 +78,13 @@ namespace EquiChat
             return gameMatched;
         }
 
-
-
         public void stop()
         {
             ProcessStartWatcher.Stop();
             ProcessStopWatcher.Stop();
         }
 
-        public string donePlaying()
+/*        public string donePlaying()
         {
             var runningGame = from process in System.Diagnostics.Process.GetProcesses()
                               where gameList.Keys.Contains(process.ProcessName)
@@ -98,7 +95,7 @@ namespace EquiChat
             string value = null;
             gameList.TryGetValue(game, out value);
             return value;
-        }
+        }*/
     }
 
     public class GameUpdateEventArgs : EventArgs

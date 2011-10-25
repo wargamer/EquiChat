@@ -31,7 +31,14 @@ namespace EquiChat
             InitializeComponent();            
             bot = new IrcBot();
             controller = new Controller();
+            listBox1.ItemsSource = controller.Players;
         }
+
+        void controller_playerUpdate(Player p)
+        {
+            
+        }
+
         /**
          * Public functions
          */
@@ -143,6 +150,17 @@ namespace EquiChat
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             controller.stop();
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            listBox1.ItemsSource = controller.Players;
+           // listBox1.i
+        }
+
+        private void button1_Click(object sender, RoutedEventArgs e)
+        {
+            controller.debug2();
         }
     }
 }
