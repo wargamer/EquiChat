@@ -13,39 +13,34 @@ using System.Windows.Shapes;
 using System.Collections;
 using System.Threading;
 using System.Windows.Threading;
+using System.ComponentModel;
 
 namespace EquiChat
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-
+    /// 
 
     public partial class MainWindow : Window
     {
         private IrcBot bot;
         private Controller controller;
         private bool connected;
-        private bool allowedSend;
+        private bool allowedSend;        
 
         public MainWindow()
         {
-            InitializeComponent();            
-            bot = new IrcBot();
+            InitializeComponent();
+            bot = new IrcBot(a => this.Dispatcher.Invoke(a));
+            this.DataContext = bot;
             controller = new Controller();
-            connected = false;
-            // Starts off as true, only if nick command fails should this be true
-            // As a nick fail is not a disconnect, this bool is used
-            allowedSend = true;
+            connected = false;            
         }
+
         /**
          * Public functions
          */
-
-        public void addToChat(string text)
-        {
-            chat.Text = chat.Text + text;
-        }
 
         /**
          * Private, Message related functions
@@ -82,7 +77,7 @@ namespace EquiChat
 
         private void UIsendMessage() 
         {
-            if (connected && allowedSend)
+            if (connected)
             {
                 Action<String> writeLine;
                 writeLine = delegate(string s)
@@ -95,31 +90,6 @@ namespace EquiChat
             else if(!connected)
             {
                 chat.Text += "Connect first!\r\n";
-            }
-            else if (!allowedSend)
-            {
-                chat.Text += "Choose a (valid) nickname first\r\n";
-            }
-            
-        }
-
-        public void addLineToChat(string line, string action)
-        {
-            chat.Text += "\r\n" + line;
-            switch (action)
-            {
-                case "resetNick":
-                    username.Clear();
-                break;
-                case "notAllowedToSend":
-                    allowedSend = false;
-                    username.Clear();
-                break;
-                case "allowedToSend":
-                    allowedSend = true;
-                break;
-                default:
-                break;
             }
         }
         
@@ -179,7 +149,7 @@ namespace EquiChat
         private void UIlogin()
         {   
             login.Content = "Disconnect";
-            bot.Start(username.Text, "#chatter", username.Text + " 8 * :LAN Party Player", "uws.mine.nu", this);
+            bot.Start(username.Text, "#chatter", username.Text + " 8 * :LAN Party Player", "uws.mine.nu");
             connected = true;
         }
 
