@@ -8,7 +8,7 @@
             <src:PlayerCollection x:Key="pc"/>
         </Grid.Resources>
         <Border BorderBrush="Black" BorderThickness="1" Margin="0,66,12,50" HorizontalAlignment="Right" Width="242">
-            <ListBox Height="445" Name="playersBox" Width="241" ItemsSource="{StaticResource pc}">
+            <ListBox Height="445" Name="playersBox" Width="241" ItemsSource="{StaticResource pc}" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding displayName}" />
@@ -17,16 +17,14 @@
                 </ListBox.ItemTemplate>
             </ListBox>
         </Border>
-        <Border Margin="7,66,273,50" BorderThickness="1" BorderBrush="Black" >
-            <TextBlock Height="442" Name="chat" Text="{Binding Path=pChatHistory}" Width="496" TextWrapping="Wrap" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True" VerticalAlignment="Bottom" />
+        <Border Margin="7,66,273,50" BorderThickness="1" BorderBrush="Black" Width="499">
+            <TextBox Height="445" Name="chat" Text="{Binding Path=pChatHistory}" Width="498" TextWrapping="Wrap" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.CanContentScroll="True" VerticalAlignment="Bottom" IsReadOnly="True" />
         </Border>
         <TextBox Height="23" HorizontalAlignment="Left" Margin="7,12,0,0" Name="username" VerticalAlignment="Top" Width="185" Text="Nickname" MouseEnter="username_MouseEnter" MouseLeave="username_MouseLeave" LostFocus="username_LostFocus" KeyUp="username_KeyUp" />
         <Button Content="Connect" Height="23" HorizontalAlignment="Left" Margin="198,12,0,0" Name="login" VerticalAlignment="Top" Width="97" Click="login_Click" />
         <Label Content="Users online:" Height="23" HorizontalAlignment="Right" Margin="0,37,111,0" Name="label1" VerticalAlignment="Top" Width="142" Padding="0" />
         <Label Content="Chat:" Margin="12,37,0,0" Name="label2" Padding="0" HorizontalAlignment="Left" Width="123" Height="23" VerticalAlignment="Top" />
-        <Button Content="Send" Margin="0,0,274,12" Name="Send" Click="Send_Click" Height="27" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="191" />
-        <TextBox Margin="12,0,478,12" Name="message" Text="Message..." MouseEnter="message_MouseEnter" MouseLeave="message_MouseLeave" LostFocus="message_LostFocus" KeyUp="message_KeyUp" Height="27" VerticalAlignment="Bottom" />
-        <Button Content="DEBUG" Height="23" HorizontalAlignment="Left" Margin="690,14,0,0" Name="debugButton" VerticalAlignment="Top" Width="75" Click="debugButton_Click" />
+        <TextBox Margin="12,0,13,12" Name="message" Text="Message..." MouseEnter="message_MouseEnter" MouseLeave="message_MouseLeave" LostFocus="message_LostFocus" KeyUp="message_KeyUp" Height="27" VerticalAlignment="Bottom" />
     </Grid>
         
 </Window>

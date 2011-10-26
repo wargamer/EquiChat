@@ -27,6 +27,7 @@ namespace EquiChat
         private Controller controller;
         private GameScanner gamescanner;
         private bool connected;
+        private string lastMessage;
 
         public MainWindow()
         {
@@ -38,6 +39,8 @@ namespace EquiChat
             
             playersBox.ItemsSource = controller.Players;
             connected = false;
+            lastMessage = "";
+            chat.VerticalContentAlignment = VerticalAlignment.Bottom;
         }
 
         /**
@@ -70,6 +73,10 @@ namespace EquiChat
         {
             if(e.Key == Key.Enter)
                 UIsendMessage();
+            if (e.Key == Key.Up)
+                message.Text = lastMessage;
+            if (e.Key == Key.Down)
+                message.Clear();
         }
 
         private void Send_Click(object sender, RoutedEventArgs e)
@@ -79,7 +86,7 @@ namespace EquiChat
 
         private void UIsendMessage() 
         {
-            if (connected)
+            if (connected && message.Text.Length > 0)
             {
                 Action<String> writeLine;
                 writeLine = delegate(string s)
@@ -87,9 +94,12 @@ namespace EquiChat
                     bot.sendMessage(s, Constants.ircChannel);                    
                 };
                 bot.Dispatcher.Invoke(DispatcherPriority.Normal, writeLine, message.Text);
+                lastMessage = message.Text;
                 message.Clear();
+                chat.UpdateLayout();
+                chat.ScrollToVerticalOffset(double.MaxValue);
             }
-            else if(!connected)
+            else if (!connected && message.Text.Length > 0)
             {
                 chat.Text += "Connect first!\r\n";
             }
@@ -168,16 +178,9 @@ namespace EquiChat
             gamescanner.stop();
         }
 
-        private void debugButton_Click(object sender, RoutedEventArgs e)
-        {            
-            controller.debug2();
-        }
-
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {          
             playersBox.ItemsSource = controller.Players;
-
-            //debugCase.init(controller);
         }
     }
 }
