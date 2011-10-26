@@ -7,7 +7,6 @@ using System.Collections.ObjectModel;
 
 namespace EquiChat
 {
-   // using PlayerCol = System.Collections.ObjectModel.ObservableCollection<Player>;
     class Controller
     {
         private GameScanner gs;
@@ -17,20 +16,6 @@ namespace EquiChat
         {
             gs = new GameScanner();
             Players = new PlayerCollection();
-            debug();
-        }
-
-        private void debug()
-        {
-            addPlayer("Hugo");
-            addPlayer("Vincent");
-            addPlayer("Raymond");
-
-        }
-
-        private void gs_GameUpdated(object sender, GameUpdateEventArgs e)
-        {
-            Debug.WriteLine(e.gameName + " " + e.state.ToString());
         }
 
         public void stop()
@@ -52,7 +37,6 @@ namespace EquiChat
 
         public void updatePlayer(string name, string game)
         {
-          //  Players.updatePlayer(name, game);
             Player player = Players.Where(p => p.Name == name).Single();
             player.Playing = game;
         }
