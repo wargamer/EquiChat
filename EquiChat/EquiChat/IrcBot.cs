@@ -15,9 +15,10 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.ComponentModel;
 
 namespace EquiChat {
-    class IrcBot : DispatcherObject
+    class IrcBot : DispatcherObject, INotifyPropertyChanged
     {   
         private static int PORT = 6667;    
         private Thread bot;
@@ -25,10 +26,14 @@ namespace EquiChat {
         private string nick;
         private string channel;
         private string user;
-        private string hostname;
-        private MainWindow window;
+        private string hostname;        
         private PingSender ping;
-        static bool started = false;
+        private string chatHistory;
+        private Action<Action> synchronousInvoker;
+        private bool started = false;
+
+        private bool connected = false;        
+        private bool allowedSend = true;
 
         private NetworkStream stream;
         private TcpClient irc;
@@ -37,32 +42,66 @@ namespace EquiChat {
         // StreamWriter is declared here so that PingSender can access it
         public static StreamWriter writer;
 
-        public IrcBot () {        
-            bot = new Thread(new ThreadStart(this.Run));
+        public IrcBot(Action<Action> pSynchronousInvoker)
+        {            
+            synchronousInvoker = pSynchronousInvoker;
 	    }
 
-        public void Start(string pNick, string pChannel, string pUser, string pHostname, MainWindow pWindow)
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void Notify(string propertyName)
         {
+            if (this.PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        public string pChatHistory
+        {
+            get { return chatHistory; }
+            set
+            {
+                if (value != chatHistory)
+                {
+                    chatHistory = (value + "\r\n");
+                    synchronousInvoker(
+                        () => Notify("pChatHistory")
+                    );                    
+                }
+            }
+        }
+
+        public void Start(string pNick, string pChannel, string pUser, string pHostname)
+        {            
             if (pNick == "" || pChannel == "" || pUser == "" || pHostname == "" || started == true)
                 return;
             started = true;
             nick = pNick; channel = pChannel; user = pUser; hostname = pHostname;
-            window = pWindow;
 
+            bot = new Thread(new ThreadStart(this.Run));            
             bot.Name = ("IRC BOT " + hostname + " " + channel);
+            
             bot.Start();
         }
 
         public void Stop()
         {        
             bot.Abort();
+            started = false;
         }
     
         public void sendMessage(string line)
         {
-            writer.WriteLine("PRIVMSG " + channel + " " + line);
-            writer.Flush();
-            addLineToChat("<" + nick + "> " + line, "");
+            if (connected && allowedSend)
+            {
+                writer.WriteLine("PRIVMSG " + channel + " " + line);
+                writer.Flush();                
+                addLineToChat("<" + nick + "> " + line);
+            }
+            else
+            {
+                addLineToChat("Choose a valid nickname first");
+            }
         }
 
         private string[] parseUserMessage(string rawMessage)
@@ -95,21 +134,25 @@ namespace EquiChat {
             }
         }
 
-        private void addLineToChat(string line, string action)
+        private void addLineToChat(string line)
         {
-            Action<string, string> writeLine;
-            writeLine = delegate(string l, string a)
-            {
-                window.addLineToChat(l, a);
-            };
-            window.Dispatcher.BeginInvoke(DispatcherPriority.Normal, writeLine, line, action);
+            /*
+                Action<string, string> writeLine;
+                writeLine = delegate(string l, string a)
+                {
+                    window.addLineToChat(l, a);
+                };
+                window.Dispatcher.BeginInvoke(DispatcherPriority.Normal, writeLine, line, action);
+            */
+            pChatHistory = pChatHistory + line;
         }
 
         private void sendNick()
         {
             writer.WriteLine("NICK " + nick);
-            writer.Flush();
+            writer.Flush();            
         }
+
         private void sendLogin()
         {
             writer.WriteLine("USER " + user);
@@ -145,29 +188,37 @@ namespace EquiChat {
 
         public void Run()
         {
-            string inputLine = "";        
+            string inputLine = "";
+            // Whether or not the nick is invalid and needs to be changed
             bool invalidNick = false;
+            // Whether or not the current nick has been "registered"
             bool registered = false;
+            // Used to make sure we don't flood the server with nick changes,
+            // It waits for some response before retrying to change the nick, if needed
+            bool pendingApproval = false;
             string firstNick = nick;
 
             try
             {
                 if (connect())
-                {                    
+                {
+                    if(!connected) connected = true;
                     ping = new PingSender(this);
                     ping.Start();
                     sendLogin();
                     while (true)
                     {         
                         inputLine = "";
-                        if (invalidNick && firstNick != nick)
+                        if (invalidNick && firstNick != nick && !pendingApproval)
                         {
                             sendLogin();
-                            invalidNick = false;                            
+                            invalidNick = false;
+                            pendingApproval = true;
                         }
-                        else if (!invalidNick && firstNick != nick)
+                        else if (!invalidNick && firstNick != nick && !pendingApproval)
                         {
                             sendNick();
+                            pendingApproval = true;
                         }
                         if (irc.GetStream().DataAvailable && (inputLine = reader.ReadLine()) != "")
                         {
@@ -175,12 +226,14 @@ namespace EquiChat {
                             if (inputLine.Contains("PRIVMSG") && (message = parseUserMessage(inputLine)) != null && message[1] == "PRIVMSG")
                             {
                                 string temp = "<" + message[0] + "> " + message[1];
-                                addLineToChat(temp, "");                                
+                                addLineToChat(temp);
                             }
                             else if (inputLine.Contains("NICK") && (message = parseUserMessage(inputLine)) != null && message[1] == "NICK")
                             {
-                                firstNick = nick;
-                                addLineToChat("", "allowedToSend");                                
+                                firstNick = nick;                                
+                                allowedSend = true;
+                                pendingApproval = false;
+                                addLineToChat("Nickname successfully changed to " + nick);
                             } 
                             else if ((message = parseAnnouncement(inputLine)) != null)
                             {
@@ -189,24 +242,31 @@ namespace EquiChat {
                                     invalidNick = false;
                                     registered = true;
                                     firstNick = nick;
-                                    addLineToChat(message[1] + "\n", "allowedToSend");                                    
+                                    addLineToChat((message[1]));
+                                    allowedSend = true;
+                                    pendingApproval = false;
                                 }
                                 else if (message[0] == "433")
                                 {
                                     if (registered)
                                     {
                                         nick = firstNick;
-                                        addLineToChat("Nickname is already in use!", "resetNick");
+                                        addLineToChat("Nickname is already in use!");
+                                        pendingApproval = false;
                                     }
                                     else
                                     {
-                                        addLineToChat("Nickname is already in use!", "notAllowedToSend");
+                                        addLineToChat("Nickname is already in use!");
+                                        allowedSend = false;
                                         invalidNick = true;
+                                        pendingApproval = false;
                                     }                                        
                                 }
                                 else if (message[0] == "438") // Too many nick changes
                                 {
-                                    addLineToChat(message[1], "");
+                                    addLineToChat(message[1]);
+                                    pendingApproval = false;
+                                    nick = firstNick;
                                 }
 
                             } 
