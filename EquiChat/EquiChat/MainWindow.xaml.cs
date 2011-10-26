@@ -33,12 +33,13 @@ namespace EquiChat
             bot = new IrcBot(a => this.Dispatcher.Invoke(a));
             this.DataContext = bot;
             controller = new Controller();
-            connected = false;
+
             // Starts off as true, only if nick command fails should this be true
             // As a nick fail is not a disconnect, this bool is used
             playersBox.ItemsSource = controller.Players;
-            connected = false;
+            connected = false;            
         }
+
         /**
          * Public functions
          */
