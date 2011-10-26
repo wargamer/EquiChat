@@ -89,7 +89,7 @@ namespace EquiChat
         public event PropertyChangedEventHandler PropertyChanged;
         private string name;
         private string playing;
-        public string Name { get { return name; } private set { name = value; } }
+        public string Name { get { return name; } set { name = value; displayName = Name + ", playing " + playing; } }
         public string Playing { get { return playing; } set { playing = value; displayName = Name + ", playing " + playing; } }
 
         public Player(string name, string playing = "")

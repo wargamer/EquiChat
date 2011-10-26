@@ -4,23 +4,21 @@ using System.Linq;
 using System.Text;
 using System.Diagnostics;
 using System.Collections.ObjectModel;
+using System.Windows.Threading;
 
 namespace EquiChat
 {
-    class Controller
-    {
-        private GameScanner gs;
+    class Controller : DispatcherObject
+    {        
         public PlayerCollection Players;
 
         public Controller()
-        {
-            gs = new GameScanner();
-            Players = new PlayerCollection();
+        {            
+            Players = new PlayerCollection();            
         }
-
+        
         public void stop()
-        {
-            gs.stop();
+        {            
         }
 
         public void debug2()
@@ -35,15 +33,34 @@ namespace EquiChat
             Players.Add(new Player(name));
         }
 
-        public void updatePlayer(string name, string game)
+        public void updatePlayer(string name, string game = "", string newname = "")
         {
-            Player player = Players.Where(p => p.Name == name).Single();
-            player.Playing = game;
+            Player player;
+            if (newname == "") newname = name;            
+            IEnumerable<Player> query = Players.Where(p => p.Name == name);
+            if (query.Count() > 0)
+            {                
+                player = query.Single();
+                if (game != "") player.Playing = game;
+                player.Name = newname;
+            }
+            else
+            {
+                addPlayer(newname);
+                player = Players.Where(p => p.Name == newname).Single();
+                if (game == "") game = "Nothing";
+                player.Playing = game;
+            }
         }
 
         public void removePlayer(string name)
         {
-            Players.Remove(Players.Where(p => p.Name == name).Single());
+            IEnumerable<Player> query = Players.Where(p => p.Name == name);
+            if (query.Count() > 0)
+            {
+                Players.Remove(query.Single());
+            }
+            
         }
     }
 }

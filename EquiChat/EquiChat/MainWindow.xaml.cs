@@ -23,21 +23,21 @@ namespace EquiChat
 
     public partial class MainWindow : Window
     {
-        private IrcBot bot;
+        private IrcBot bot;        
         private Controller controller;
+        private GameScanner gamescanner;
         private bool connected;
 
         public MainWindow()
         {
-            InitializeComponent();
-            bot = new IrcBot(a => this.Dispatcher.Invoke(a));
-            this.DataContext = bot;
+            InitializeComponent();                        
             controller = new Controller();
-
-            // Starts off as true, only if nick command fails should this be true
-            // As a nick fail is not a disconnect, this bool is used
+            gamescanner = new GameScanner();
+            bot = new IrcBot(a => this.Dispatcher.Invoke(a), gamescanner, controller);
+            chat.DataContext = bot;
+            
             playersBox.ItemsSource = controller.Players;
-            connected = false;            
+            connected = false;
         }
 
         /**
@@ -84,7 +84,7 @@ namespace EquiChat
                 Action<String> writeLine;
                 writeLine = delegate(string s)
                 {
-                    bot.sendMessage(s);
+                    bot.sendMessage(s, Constants.ircChannel);                    
                 };
                 bot.Dispatcher.Invoke(DispatcherPriority.Normal, writeLine, message.Text);
                 message.Clear();
@@ -150,7 +150,7 @@ namespace EquiChat
         private void UIlogin()
         {   
             login.Content = "Disconnect";
-            bot.Start(username.Text, Constants.ircChannel, username.Text + " 8 * :LAN Party Player", Constants.ircServer);
+            bot.Start(username.Text, Constants.ircChannel, username.Text + " 8 * :LAN Party Player", Constants.ircServer, Constants.ircTechChannel);
             connected = true;
         }
 
@@ -163,22 +163,21 @@ namespace EquiChat
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            controller.stop();
             bot.Stop();
+            controller.stop();
+            gamescanner.stop();
         }
 
         private void debugButton_Click(object sender, RoutedEventArgs e)
-        {
-            //debugCase.debug();
+        {            
             controller.debug2();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-          //  playersBox.DataContext = controller.Players;
+        {          
             playersBox.ItemsSource = controller.Players;
 
-            debugCase.init(controller);
+            //debugCase.init(controller);
         }
     }
 }
