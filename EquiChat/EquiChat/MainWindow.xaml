@@ -8,7 +8,7 @@
             <src:PlayerCollection x:Key="pc"/>
         </Grid.Resources>
         <Border BorderBrush="Black" BorderThickness="1" Margin="0,66,12,50" HorizontalAlignment="Right" Width="242">
-            <ListBox Height="405" Name="playersBox" Width="197" ItemsSource="{StaticResource pc}">
+            <ListBox Height="445" Name="playersBox" Width="241" ItemsSource="{StaticResource pc}">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding displayName}" />

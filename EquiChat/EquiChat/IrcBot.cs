@@ -85,9 +85,13 @@ namespace EquiChat {
         }
 
         public void Stop()
-        {        
-            bot.Abort();
-            started = false;
+        {
+            if (started)
+            {
+                if(bot != null)
+                    bot.Abort();
+                started = false;
+            }            
         }
     
         public void sendMessage(string line)
@@ -261,6 +265,22 @@ namespace EquiChat {
                                         invalidNick = true;
                                         pendingApproval = false;
                                     }                                        
+                                }
+                                else if (message[0] == "432")
+                                {
+                                    if (registered)
+                                    {
+                                        nick = firstNick;
+                                        addLineToChat("Invalid character in nick, keep in mind that it has to start with a letter.");
+                                        pendingApproval = false;
+                                    }
+                                    else
+                                    {
+                                        addLineToChat("Invalid character in nick, keep in mind that it has to start with a letter.");
+                                        allowedSend = false;
+                                        invalidNick = true;
+                                        pendingApproval = false;
+                                    }                                    
                                 }
                                 else if (message[0] == "438") // Too many nick changes
                                 {
