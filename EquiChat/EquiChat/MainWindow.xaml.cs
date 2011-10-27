@@ -28,6 +28,7 @@ namespace EquiChat
         private GameScanner gamescanner;
         private bool connected;
         private string lastMessage;
+        private Window about;
 
         public MainWindow()
         {
@@ -181,6 +182,15 @@ namespace EquiChat
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {          
             playersBox.ItemsSource = controller.Players;
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            if (about == null || !about.IsLoaded)
+            {
+                about = new Window1();
+                about.Show();
+            }                
         }
     }
 }
