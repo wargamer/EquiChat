@@ -1,0 +1,8 @@
+﻿<Window x:Class="EquiChat.Window1"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="About" Height="300" Width="300" Loaded="Window_Loaded" ResizeMode="NoResize" FontFamily="Consolas" Background="Black" Foreground="#FF00BC00">
+    <Grid>
+        <TextBox Text="" BorderThickness="0" HorizontalAlignment="Stretch" TextWrapping="Wrap" Height="264" Margin="-2,-1,0,0" Name="text" VerticalAlignment="Top" Width="282" TextChanged="label1_TextChanged" AcceptsReturn="True" AcceptsTab="True" IsReadOnly="True" Foreground="#FF00BC00" Background="Black" BorderBrush="Black" OpacityMask="Black" Focusable="False" />
+    </Grid>
+</Window>
