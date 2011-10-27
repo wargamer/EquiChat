@@ -17,10 +17,6 @@ namespace EquiChat
             Players = new PlayerCollection();            
         }
         
-        public void stop()
-        {            
-        }
-
         public void debug2()
         {
             updatePlayer("Raymond", "lol");
@@ -36,19 +32,19 @@ namespace EquiChat
         public void updatePlayer(string name, string game = "", string newname = "")
         {
             Player player;
-            if (newname == "") newname = name;            
+            if (newname == string.Empty) newname = name;            
             IEnumerable<Player> query = Players.Where(p => p.Name == name);
             if (query.Count() > 0)
             {                
                 player = query.Single();
-                if (game != "") player.Playing = game;
+                if (game != string.Empty) player.Playing = game;
                 player.Name = newname;
             }
             else
             {
                 addPlayer(newname);
                 player = Players.Where(p => p.Name == newname).Single();
-                if (game == "") game = "Nothing";
+                if (game == string.Empty) game = "Nothing";
                 player.Playing = game;
             }
         }

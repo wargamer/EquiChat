@@ -25,7 +25,6 @@ namespace EquiChat
     {
         private IrcBot bot;        
         private Controller controller;
-        private GameScanner gamescanner;
         private bool connected;
         private string lastMessage;
 
@@ -33,8 +32,7 @@ namespace EquiChat
         {
             InitializeComponent();                        
             controller = new Controller();
-            gamescanner = new GameScanner();
-            bot = new IrcBot(a => this.Dispatcher.Invoke(a), gamescanner, controller);
+            bot = new IrcBot(a => this.Dispatcher.Invoke(a), controller);
             chat.DataContext = bot;
             
             playersBox.ItemsSource = controller.Players;
@@ -174,8 +172,6 @@ namespace EquiChat
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             bot.Stop();
-            controller.stop();
-            gamescanner.stop();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)

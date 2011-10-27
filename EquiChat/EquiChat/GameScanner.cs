@@ -25,7 +25,15 @@ namespace EquiChat
                 GameLaunched(this, e);
         }
 
-        public GameScanner(string pathToGameList = Constants.gameListXML)
+        private static GameScanner instance;
+        public static GameScanner getInstance()
+        {
+            if (instance == null)
+                instance = new GameScanner();
+            return instance;
+        }
+
+        private GameScanner(string pathToGameList = Constants.gameListXML)
         {
             var doc = new XmlDocument();
             using (StreamReader reader = new StreamReader(pathToGameList))

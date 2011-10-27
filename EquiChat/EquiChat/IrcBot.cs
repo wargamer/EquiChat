@@ -47,10 +47,10 @@ namespace EquiChat {
         // StreamWriter is declared here so that PingSender can access it
         public static StreamWriter writer;
 
-        public IrcBot(Action<Action> pSynchronousInvoker, GameScanner pGamescanner, Controller pController)
+        public IrcBot(Action<Action> pSynchronousInvoker, Controller pController)
         {            
             synchronousInvoker = pSynchronousInvoker;
-            gs = pGamescanner;
+            gs = GameScanner.getInstance();// pGamescanner;
             gu = new GameUpdate(gs_GameLaunched);
             gs.GameLaunched += gu;
             ctrl = pController;
@@ -120,7 +120,8 @@ namespace EquiChat {
                 if(bot != null)
                     bot.Abort();
                 started = false;
-            }            
+            }
+            gs.stop();
         }
     
         public void sendMessage(string line, string channelname, bool silent = false)
