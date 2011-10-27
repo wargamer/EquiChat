@@ -24,29 +24,30 @@ namespace EquiChat
             Players.Add(new Player("kees", "BF3"));
         }
 
+        public void clearPlayers()
+        {
+            Players.Clear();
+        }
+
         public void addPlayer(string name)
         {
             Players.Add(new Player(name));
         }
 
-        public void updatePlayer(string name, string game = "", string newname = "")
+        public bool updatePlayer(string name, string game = "", string newname = "")
         {
             Player player;
             if (newname == string.Empty) newname = name;            
             IEnumerable<Player> query = Players.Where(p => p.Name == name);
             if (query.Count() > 0)
-            {                
+            {
                 player = query.Single();
                 if (game != string.Empty) player.Playing = game;
                 player.Name = newname;
+                return true;
             }
             else
-            {
-                addPlayer(newname);
-                player = Players.Where(p => p.Name == newname).Single();
-                if (game == string.Empty) game = "Nothing";
-                player.Playing = game;
-            }
+                return false;
         }
 
         public void removePlayer(string name)

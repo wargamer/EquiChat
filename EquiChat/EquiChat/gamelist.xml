@@ -1,8 +1,4 @@
-<gamelist>
-	<game>
-		<name>League of Legends</name>
-		<pname>lol</pname>
-	</game>
+<gamelist>	
 	<game>
 		<name>notepad</name>
 		<pname>notepad</pname>
@@ -12,7 +8,19 @@
 		<pname>cmd</pname>
 	</game>
 	<game>
-		<name>LoL</name>
+		<name>League of Legends</name>
 		<pname>lol.launcher</pname>
+	</game>
+	<game>
+		<name>MOH:AA</name>
+		<pname>MOHAA</pname>
+	</game>
+	<game>
+		<name>Battlefield 3</name>
+		<pname>bf3</pname>
+	</game>
+	<game>
+		<name>Call of Duty 4</name>
+		<pname>iw3mp</pname>
 	</game>
 </gamelist>

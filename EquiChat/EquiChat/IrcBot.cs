@@ -58,22 +58,25 @@ namespace EquiChat {
 
         void gs_GameLaunched(object sender, GameUpdateEventArgs e)
         {
-            if (e.state == GameUpdateEventArgs.gameState.start)
+            if (connected && allowedSend)
             {
-                playingGame = e.gameName;
-                announceGame();
-                invokeController(nick, playingGame);
-            }
-            else if (e.state == GameUpdateEventArgs.gameState.stop)
-            {
-                playingGame = "";
-                announceGame();
-                invokeController(nick, "Nothing");                
-            }
-            else
-            {
-                throw new NotImplementedException();
-            }            
+                if (e.state == GameUpdateEventArgs.gameState.start)
+                {
+                    playingGame = e.gameName;
+                    announceGame();
+                    invokeController(nick, playingGame);
+                }
+                else if (e.state == GameUpdateEventArgs.gameState.stop)
+                {
+                    playingGame = "";
+                    announceGame();
+                    invokeController(nick, "Nothing");
+                }
+                else
+                {
+                    throw new NotImplementedException();
+                }
+            }           
         }	    
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -129,7 +132,8 @@ namespace EquiChat {
             if (connected && allowedSend)
             {
                 writer.WriteLine("PRIVMSG " + channelname + " " + line);
-                writer.Flush();                
+                writer.Flush();
+                writer.AutoFlush = true;
                 if(!silent)
                     addLineToChat("<" + nick + "> " + line);
             }
@@ -145,7 +149,7 @@ namespace EquiChat {
             if (match.Success)
             {
                 // 1 = user, 2 = type (privmsg, nick), 3 = channel, 4 = message
-                string[] answer = { match.Groups[1].Value, match.Groups[2].Value, match.Groups[3].Value, match.Groups[4].Value };
+                string[] answer = { match.Groups[1].Value, match.Groups[2].Value, match.Groups[3].Value, match.Groups[4].Value };                
                 return answer;
             }
             else
@@ -187,15 +191,7 @@ namespace EquiChat {
         }
 
         private void addLineToChat(string line)
-        {
-            /*
-                Action<string, string> writeLine;
-                writeLine = delegate(string l, string a)
-                {
-                    window.addLineToChat(l, a);
-                };
-                window.Dispatcher.BeginInvoke(DispatcherPriority.Normal, writeLine, line, action);
-            */
+        {            
             pChatHistory = pChatHistory + line;
         }
 
@@ -243,7 +239,7 @@ namespace EquiChat {
         private void invokeController(string pFromNick, string gamename = "", string pToNick = "")
         {            
             if (gamename == "")
-            {
+            {                
                 if (pToNick == null)
                 {
                     Action<string> removePlayer;
@@ -258,10 +254,13 @@ namespace EquiChat {
                     Action<string, string> addPlayer;
                     addPlayer = delegate(string fromNick, string toNick)
                     {
-                        if (fromNick != toNick)
-                            ctrl.updatePlayer(fromNick, "", toNick);
+                        if (fromNick != toNick && toNick != "") 
+                        {
+                            if(!ctrl.updatePlayer(fromNick, "", toNick))
+                                ctrl.addPlayer(toNick);
+                        }
                         else
-                            ctrl.updatePlayer(fromNick);
+                            ctrl.addPlayer(fromNick);
                     };
                     ctrl.Dispatcher.BeginInvoke(DispatcherPriority.Normal, addPlayer, pFromNick, pToNick);
                 }
@@ -271,7 +270,12 @@ namespace EquiChat {
                 Action<string, string, string> updatePlayer;
                 updatePlayer = delegate(string nick, string game, string newnick)
                 {
-                    ctrl.updatePlayer(nick, game, newnick);
+                    if (!ctrl.updatePlayer(nick, game, newnick))
+                    {
+                        ctrl.addPlayer(nick);
+                        ctrl.updatePlayer(nick, game, newnick);
+                    }
+
                 };
                 ctrl.Dispatcher.BeginInvoke(DispatcherPriority.Normal, updatePlayer, pFromNick, gamename, pToNick);
             }
@@ -312,7 +316,7 @@ namespace EquiChat {
             // Used to make sure we don't flood the server with nick changes,
             // It waits for some response before retrying to change the nick, if needed
             bool pendingApproval = false;
-            string firstNick = nick;
+            string firstNick = nick;            
 
             try
             {
@@ -386,7 +390,7 @@ namespace EquiChat {
                             }
                             else if (inputLine.Contains("NICK") && (message = parseUserMessage(inputLine)) != null && message[1] == "NICK" && message[0] == firstNick)
                             {
-                                invokeController(firstNick);
+                                invokeController(message[0], "", message[3]);
                                 firstNick = nick;
                                 allowedSend = true;
                                 pendingApproval = false;
@@ -396,6 +400,10 @@ namespace EquiChat {
                             {
                                 invokeController(message[0], "", message[3]);
                             }
+                            else if (inputLine.Contains("JOIN") && (message = parseUserMessage(inputLine)) != null && message[1] == "JOIN" && message[3] == channel && message[0] != nick)
+                            {                                
+                                invokeController(message[0]);
+                            }
                             else if (inputLine.Contains("QUIT") && (message = parseUserMessage(inputLine)) != null && message[1] == "QUIT")
                             {
                                 invokeController(message[0], "", null);
@@ -404,46 +412,42 @@ namespace EquiChat {
                             {
                                 if (message[0] == "001")
                                 {
-                                    invokeController(nick);
+                                    invokeController(nick, playingGame);
                                     invalidNick = false;
                                     registered = true;
                                     firstNick = nick;
                                     addLineToChat((message[1]));
                                     allowedSend = true;
                                     pendingApproval = false;
-                                    whois();
+                                    whois();                                    
                                     announceGame();
                                 }
                                 else if (message[0] == "433")
                                 {
+                                    addLineToChat("Nickname is already in use!");
+                                    pendingApproval = false;
                                     if (registered)
                                     {
                                         nick = firstNick;
-                                        addLineToChat("Nickname is already in use!");
-                                        pendingApproval = false;
                                     }
                                     else
                                     {
-                                        addLineToChat("Nickname is already in use!");
                                         allowedSend = false;
                                         invalidNick = true;
-                                        pendingApproval = false;
                                     }
                                 }
                                 else if (message[0] == "432")
                                 {
+                                    addLineToChat("Invalid character in nick, keep in mind that it has to start with a letter.");
+                                    pendingApproval = false;
                                     if (registered)
                                     {
                                         nick = firstNick;
-                                        addLineToChat("Invalid character in nick, keep in mind that it has to start with a letter.");
-                                        pendingApproval = false;
                                     }
                                     else
                                     {
-                                        addLineToChat("Invalid character in nick, keep in mind that it has to start with a letter.");
                                         allowedSend = false;
                                         invalidNick = true;
-                                        pendingApproval = false;
                                     }
                                 }
                                 else if (message[0] == "438") // Too many nick changes
@@ -453,15 +457,14 @@ namespace EquiChat {
                                     nick = firstNick;
                                 }
 
-                            } 
+                            }
                             //Console.WriteLine("DEBUG: " + inputLine);
                         }
-                    
+                        
                     }
                 }
                 else
-                {
-                    Console.WriteLine("Connection failed.");
+                {                    
                     sleepWithBreaks(5000);
                     Run();
                 }
@@ -494,6 +497,7 @@ namespace EquiChat {
                 writer = new StreamWriter(stream);
                 return true;
             } catch(Exception e) {
+                addLineToChat("Connection failed.\r\n");
                 Console.WriteLine(e.ToString());
                 return false;
             }

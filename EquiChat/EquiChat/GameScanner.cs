@@ -5,6 +5,7 @@ using System.Xml;
 using System.IO;
 using System.Diagnostics;
 using System.Linq;
+using System.Management;
 
 namespace EquiChat
 {
@@ -48,6 +49,7 @@ namespace EquiChat
                 var value = node.SelectSingleNode("name").InnerText;
                 gameList.Add(key + ".exe", value);
             }
+            
             ProcessStartWatcher = new System.Management.ManagementEventWatcher(Constants.selectStart);
             ProcessStopWatcher = new System.Management.ManagementEventWatcher(Constants.selectStop);
 
@@ -59,7 +61,7 @@ namespace EquiChat
         }
 
         private void ProcessUpdateWatcher_EventArrived(object sender, System.Management.EventArrivedEventArgs e)
-        {
+        {           
             string gameName = getGameNameFromProc((string)e.NewEvent["ProcessName"]);
             if (gameName == string.Empty)
                 return;
@@ -74,7 +76,7 @@ namespace EquiChat
                 onGameStart(new GameUpdateEventArgs(gameName, GameUpdateEventArgs.gameState.stop));
                 currentlyPlaying = string.Empty;
             }
-            else
+            else                            
                 throw new System.PlatformNotSupportedException();
         }
 

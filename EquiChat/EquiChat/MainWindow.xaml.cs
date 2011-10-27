@@ -157,15 +157,24 @@ namespace EquiChat
         }
 
         private void UIlogin()
-        {   
-            login.Content = "Disconnect";
-            bot.Start(username.Text, Constants.ircChannel, username.Text + " 8 * :LAN Party Player", Constants.ircServer, Constants.ircTechChannel);
-            connected = true;
+        {
+            if (username.Text != "Nickname")
+            {
+                login.Content = "Disconnect";
+                bot.Start(username.Text, Constants.ircChannel, username.Text + " 8 * :LAN Party Player", Constants.ircServer, Constants.ircTechChannel);
+                connected = true;
+            }
+            else
+            {
+                chat.Text += "Enter a valid nickname first!\r\n";
+            }
+            
         }
 
         private void UILogout()
         {
-            bot.Stop();            
+            controller.clearPlayers();
+            bot.Stop();
             login.Content = "Connect";
             connected = false;
         }
