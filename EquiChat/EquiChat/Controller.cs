@@ -9,55 +9,55 @@ using System.Windows.Threading;
 namespace EquiChat
 {
     class Controller : DispatcherObject
-    {        
+    {
         public PlayerCollection Players;
 
         public Controller()
-        {            
-            Players = new PlayerCollection();            
-        }
-        
-        public void debug2()
         {
-            updatePlayer("Raymond", "lol");
-            updatePlayer("Vincent", "MOH");
-            Players.Add(new Player("kees", "BF3"));
+            Players = new PlayerCollection();
+        }
+
+        public bool addPlayer(string name)
+        {
+            if (Players.FirstOrDefault(p => p.Name == name) != null)
+                return false;
+            else
+                Players.Add(new Player(name));
+            return true;
+        }
+
+        public bool removePlayer(string name)
+        {
+            Player toRemove = Players.FirstOrDefault(p => p.Name == name);
+            if (toRemove == null)
+                return false;
+            Players.Remove(toRemove);
+            return true;
+        }
+
+        public bool setPlayerName(string name, string newname)
+        {
+            Player playerToUpdate = Players.FirstOrDefault(p => p.Name == name);
+            if (playerToUpdate == null || string.IsNullOrWhiteSpace(newname))
+                return false;
+
+            playerToUpdate.Name = newname;
+            return true;
+        }
+
+        public bool setPlayerGame(string name, string game)
+        {
+            Player playerToUpdate = Players.FirstOrDefault(p => p.Name == name);
+            if (playerToUpdate == null)
+                return false;
+
+            playerToUpdate.Playing= game;
+            return true;
         }
 
         public void clearPlayers()
         {
             Players.Clear();
-        }
-
-        public void addPlayer(string name)
-        {
-            Players.Add(new Player(name));
-        }
-
-        public bool updatePlayer(string name, string game = "", string newname = "")
-        {
-            Player player;
-            if (newname == string.Empty) newname = name;            
-            IEnumerable<Player> query = Players.Where(p => p.Name == name);
-            if (query.Count() > 0)
-            {
-                player = query.Single();
-                if (game != string.Empty) player.Playing = game;
-                player.Name = newname;
-                return true;
-            }
-            else
-                return false;
-        }
-
-        public void removePlayer(string name)
-        {
-            IEnumerable<Player> query = Players.Where(p => p.Name == name);
-            if (query.Count() > 0)
-            {
-                Players.Remove(query.Single());
-            }
-            
         }
     }
 }

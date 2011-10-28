@@ -15,11 +15,11 @@ namespace EquiChat
             addSomePlayers();
         }
 
-        public static void playerUpdate(string playerName, string gameName)
+  /*      public static void playerUpdate(string playerName, string gameName)
         {
             controller.updatePlayer(playerName, gameName);
         }
-
+*/
         public static void addSomePlayers()
         {
             controller.addPlayer("Hugo");
@@ -34,7 +34,7 @@ namespace EquiChat
 
         public static void debug()
         {
-            playerUpdate("Vincent", "MOH");
+     //       playerUpdate("Vincent", "MOH");
         }
     }
 }

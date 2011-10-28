@@ -256,7 +256,7 @@ namespace EquiChat {
                     {
                         if (fromNick != toNick && toNick != "") 
                         {
-                            if(!ctrl.updatePlayer(fromNick, "", toNick))
+                            if(!ctrl.setPlayerName(fromNick, toNick))
                                 ctrl.addPlayer(toNick);
                         }
                         else
@@ -270,16 +270,14 @@ namespace EquiChat {
                 Action<string, string, string> updatePlayer;
                 updatePlayer = delegate(string nick, string game, string newnick)
                 {
-                    if (!ctrl.updatePlayer(nick, game, newnick))
+                    if (!ctrl.setPlayerGame(nick, game))
                     {
                         ctrl.addPlayer(nick);
-                        ctrl.updatePlayer(nick, game, newnick);
+                        ctrl.setPlayerGame(nick, game);
                     }
-
                 };
                 ctrl.Dispatcher.BeginInvoke(DispatcherPriority.Normal, updatePlayer, pFromNick, gamename, pToNick);
             }
-            
         }
 
         private void stopNow()
