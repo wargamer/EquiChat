@@ -29,7 +29,7 @@ namespace EquiChat {
         private string user;
         private string hostname;
         private string chatHistory;
-        private string playingGame = "Nothing";
+        private string playingGame = "";
         private Action<Action> synchronousInvoker;
         private PingSender ping;
         private GameScanner gs;
@@ -50,7 +50,7 @@ namespace EquiChat {
         public IrcBot(Action<Action> pSynchronousInvoker, Controller pController)
         {            
             synchronousInvoker = pSynchronousInvoker;
-            gs = GameScanner.getInstance();// pGamescanner;
+            gs = GameScanner.getInstance();
             gu = new GameUpdate(gs_GameLaunched);
             gs.GameLaunched += gu;
             ctrl = pController;
@@ -70,7 +70,7 @@ namespace EquiChat {
                 {
                     playingGame = "";
                     announceGame();
-                    invokeController(nick, "Nothing");
+                    invokeController(nick, "*");
                 }
                 else
                 {
@@ -221,7 +221,7 @@ namespace EquiChat {
             if(allowedSend) {            
                 if (playingGame == "")
                 {
-                    sendMessage("!#! 1 <" + nick + "> playing Nothing", techChannel, true);
+                    sendMessage("!#! 1 <" + nick + "> playing *", techChannel, true);
                 }
                 else
                 {
@@ -267,6 +267,7 @@ namespace EquiChat {
             }
             else
             {
+                if (gamename == "*") gamename = "";
                 Action<string, string, string> updatePlayer;
                 updatePlayer = delegate(string nick, string game, string newnick)
                 {
@@ -290,6 +291,7 @@ namespace EquiChat {
 
         private void sleepWithBreaks(int sleepTime)
         {
+            Console.WriteLine("Sleeping : " + sleepTime);
             int sleptTime = 0;
             while (sleptTime < sleepTime)
             {            
@@ -338,8 +340,9 @@ namespace EquiChat {
                             sendNick();
                             pendingApproval = true;
                         }
-                        if (irc.GetStream().DataAvailable && (inputLine = reader.ReadLine()) != "")
+                        if (irc.GetStream().DataAvailable)
                         {
+                            inputLine = reader.ReadLine();
                             string[] message;
                             if (inputLine.Contains("PRIVMSG") && (message = parseUserMessage(inputLine)) != null && message[1] == "PRIVMSG")
                             {
@@ -359,12 +362,14 @@ namespace EquiChat {
                                             {
                                                 if (techMessage[1] == "whoisplaying")
                                                 {
+                                                    Console.WriteLine("TECH: Announcegame!");
                                                     announceGame();
                                                 }
                                             }
                                             else if (techMessage[0] == "1" && techMessage[1] == message[0])
                                             {
-                                                invokeController(techMessage[1], techMessage[3]);                                                
+                                                Console.WriteLine("TECH: Game update: " + techMessage[1] + " " + techMessage[3]);                                                
+                                                invokeController(techMessage[1], techMessage[3]);
                                             }
                                             else if (techMessage[0] == "1" && techMessage[1] != message[0])
                                             {
@@ -375,7 +380,10 @@ namespace EquiChat {
                                                 Console.WriteLine("Tech Messagetype not recognized: " + techMessage[0]);
                                             }
                                         }
-                                        
+                                        else
+                                        {
+                                            Console.WriteLine("Tech message not understood" + message[3]);
+                                        }
                                     }
                                     // Anything else will be ignored, probably just normal chat
                                 }

@@ -14,6 +14,7 @@ namespace EquiChat
         public PingSender(IrcBot pBot)
         {
             pingSender = new Thread(new ThreadStart(this.Run));
+            pingSender.Name = "Pingsender";
             bot = pBot;
         }
 
@@ -50,8 +51,9 @@ namespace EquiChat
                     IrcBot.writer.Flush();
                     sleepWithBreaks(sleepTime);
                 }
-                catch (ThreadAbortException)
+                catch (ThreadAbortException e)
                 {
+                    Console.WriteLine(e);
                     return;
                 }
             }
