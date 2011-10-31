@@ -6,6 +6,8 @@ using System.IO;
 using System.Diagnostics;
 using System.Linq;
 using System.Management;
+using System.Net;
+using System.Text;
 
 namespace EquiChat
 {
@@ -34,21 +36,9 @@ namespace EquiChat
             return instance;
         }
 
-        private GameScanner(string pathToGameList = Constants.gameListXML)
+        private GameScanner()
         {
-            var doc = new XmlDocument();
-            using (StreamReader reader = new StreamReader(pathToGameList))
-            {
-                var list = reader.ReadToEnd();
-                doc.LoadXml(list);
-            }
-            var games = doc.GetElementsByTagName("game");
-            foreach (XmlNode node in games)
-            {
-                var key = node.SelectSingleNode("pname").InnerText;
-                var value = node.SelectSingleNode("name").InnerText;
-                gameList.Add(key + ".exe", value);
-            }
+            fetchGameList();
             
             ProcessStartWatcher = new System.Management.ManagementEventWatcher(Constants.selectStart);
             ProcessStopWatcher = new System.Management.ManagementEventWatcher(Constants.selectStop);
@@ -58,6 +48,45 @@ namespace EquiChat
 
             ProcessStartWatcher.Start();
             ProcessStopWatcher.Start();
+        }
+
+        public void fetchGameList()
+        {
+            gameList.Clear();
+            var doc = new XmlDocument();
+            var list = "";
+            if (Constants.gameListURL != string.Empty)
+            {
+                try
+                {
+                    WebClient webclient = new WebClient();
+                    Stream stream = webclient.OpenRead(Constants.gameListURL);
+                    StreamReader reader = new StreamReader(stream);
+
+                    list = reader.ReadToEnd();
+                    stream.Close();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    list = string.Empty;
+                }
+            }
+            if (list == string.Empty || Constants.gameListURL == string.Empty)
+            {
+                using (StreamReader reader = new StreamReader(Constants.gameListXML))
+                {
+                    list = reader.ReadToEnd();
+                }
+            }
+            doc.LoadXml(list);
+            var games = doc.GetElementsByTagName("game");
+            foreach (XmlNode node in games)
+            {
+                var key = node.SelectSingleNode("pname").InnerText;
+                var value = node.SelectSingleNode("name").InnerText;
+                gameList.Add(key + ".exe", value);
+            }
         }
 
         private void ProcessUpdateWatcher_EventArrived(object sender, System.Management.EventArrivedEventArgs e)

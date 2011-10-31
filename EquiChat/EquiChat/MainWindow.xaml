@@ -28,6 +28,7 @@
         <ToolBar Height="26" HorizontalAlignment="Left" Name="toolBar1" VerticalAlignment="Top" Width="778" ItemsSource="{Binding}" Margin="0,3,0,0" BorderBrush="White" Background="Black" Foreground="#FF00BC00">
             <Button Click="Button_Click" Foreground="#FF00BC00">About</Button>            
         </ToolBar>
+        <Button Content="Refresh Gamelist" Height="23" HorizontalAlignment="Left" Margin="301,39,0,0" Name="refresh_gamelist" VerticalAlignment="Top" Width="112" Click="refresh_gamelist_Click" />
     </Grid>
         
 </Window>

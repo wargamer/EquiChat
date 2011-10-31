@@ -197,5 +197,10 @@ namespace EquiChat
                 about.Show();
             }                
         }
+
+        private void refresh_gamelist_Click(object sender, RoutedEventArgs e)
+        {
+            GameScanner.getInstance().fetchGameList();
+        }
     }
 }

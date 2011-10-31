@@ -16,6 +16,7 @@ namespace EquiChat
         public const string ircServer = "uws.mine.nu";
         public const string ircChannel = "#chatter";
         public const string ircTechChannel = "#tech";
+        public const string gameListURL = "http://uws.mine.nu/equinox/gamelist.xml";
 
     }
 }
